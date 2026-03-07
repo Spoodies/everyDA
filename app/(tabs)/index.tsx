@@ -1,11 +1,15 @@
-import { StyleSheet } from 'react-native';
-
 import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+import { View } from '@/components/Themed';
+import { StyleSheet } from 'react-native';
+import { Button, Text, YStack } from 'tamagui';
 
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
+      <YStack flex={1} jc="center" ai="center" gap="$4" p="$4">
+        <Text fontSize="$8" fontWeight="700">Hello Tamagui</Text>
+        <Button>Press me</Button>
+      </YStack>
       <Text style={styles.title}>Tab One</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="app/(tabs)/index.tsx" />

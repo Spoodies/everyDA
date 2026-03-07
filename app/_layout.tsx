@@ -5,12 +5,14 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { TamaguiProvider, Theme } from 'tamagui';
+import tamaguiConfig from '../tamagui.config.js';
 
 import { useColorScheme } from '@/components/useColorScheme';
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -47,13 +49,18 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const themeName = colorScheme === 'dark' ? 'dark' : 'light';
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
+      <Theme name={themeName}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          </Stack>
+        </ThemeProvider>
+      </Theme>
+    </TamaguiProvider>
   );
 }
