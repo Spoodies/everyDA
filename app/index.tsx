@@ -5,12 +5,15 @@ import {
   useWindowDimensions
 } from 'react-native';
 import { Button, Text, YStack } from 'tamagui';
+import type { ExperimentKind } from '../components/AddExperimentModal';
+import { AddExperimentModal } from '../components/AddExperimentModal';
 import { useThemeMode } from '../components/theme-mode';
 
 type Experiment = {
   id: string;
   title: string;
   notes: string;
+  kind: ExperimentKind;
   createdAt: string;
 };
 
@@ -23,8 +26,7 @@ export default function HomeScreen() {
   const cardHeight = Math.min(cardWidth / 5, 70);
 
   const [experiments, setExperiments] = useState<Experiment[]>([]);
-  const [title, setTitle] = useState('');
-  const [notes, setNotes] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -49,7 +51,7 @@ export default function HomeScreen() {
     loadExperiments();
   }, []);
 
-  const addExperiment = async () => {
+  const addExperiment = async (title: string, notes: string, kind: ExperimentKind) => {
     const trimmedTitle = title.trim();
     const trimmedNotes = notes.trim();
 
@@ -62,6 +64,7 @@ export default function HomeScreen() {
       id: `${Date.now()}`,
       title: trimmedTitle,
       notes: trimmedNotes,
+      kind,
       createdAt: new Date().toISOString(),
     };
 
@@ -71,8 +74,7 @@ export default function HomeScreen() {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextList));
       setExperiments(nextList);
-      setTitle('');
-      setNotes('');
+      setModalVisible(false);
     } catch {
       Alert.alert('Save failed', 'Could not save experiment to device storage.');
     } finally {
@@ -91,13 +93,18 @@ export default function HomeScreen() {
       backgroundColor="$background"
       justifyContent="space-between"
     >
+      <AddExperimentModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={addExperiment}
+      />
       <YStack>
         {experiments.map((experiment) => (
           <Button
             key={experiment.id}
             width={cardWidth}
             height={cardHeight}
-            borderWidth={1}
+            borderWidth={2}
             borderRadius={20}
             borderColor="$borderColor"
             backgroundColor="$backgroundButton"
@@ -108,10 +115,10 @@ export default function HomeScreen() {
           </Button>
         ))}
         <Button
-          onPress={addExperiment}
+          onPress={() => setModalVisible(true)}
           width={cardWidth}
           height={cardHeight}
-          borderWidth={1}
+          borderWidth={2}
           borderRadius={20}
           backgroundColor="$background"
           borderColor="$borderColor"
@@ -127,7 +134,7 @@ export default function HomeScreen() {
         onPress={cycleTheme}
         width={cardWidth}
         height={cardHeight}
-        borderWidth={1}
+        borderWidth={2}
         borderRadius={20}
         borderColor="$borderColor"
         backgroundColor="$backgroundStrong"
