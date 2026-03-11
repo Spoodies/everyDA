@@ -4,10 +4,9 @@ import {
   Alert,
   useWindowDimensions
 } from 'react-native';
-import { Button, Text, YStack } from 'tamagui';
+import { Button, ScrollView, Text, YStack } from 'tamagui';
 import type { ExperimentKind } from '../components/AddExperimentModal';
 import { AddExperimentModal } from '../components/AddExperimentModal';
-import { useThemeMode } from '../components/theme-mode';
 
 type Experiment = {
   id: string;
@@ -20,7 +19,6 @@ type Experiment = {
 const STORAGE_KEY = 'experiments:v1';
 
 export default function HomeScreen() {
-  const { themeName, cycleTheme } = useThemeMode();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth * 0.8;
   const cardHeight = Math.min(cardWidth / 5, 70);
@@ -98,6 +96,7 @@ export default function HomeScreen() {
         onClose={() => setModalVisible(false)}
         onSave={addExperiment}
       />
+      <ScrollView showsVerticalScrollIndicator={false}>
       <YStack>
         {experiments.map((experiment) => (
           <Button
@@ -106,6 +105,7 @@ export default function HomeScreen() {
             height={cardHeight}
             borderWidth={2}
             borderRadius={20}
+            marginBottom={15}
             borderColor="$borderColor"
             backgroundColor="$backgroundButton"
             alignItems="center"
@@ -129,21 +129,7 @@ export default function HomeScreen() {
           +
         </Button>
       </YStack>
-
-      <Button
-        onPress={cycleTheme}
-        width={cardWidth}
-        height={cardHeight}
-        borderWidth={2}
-        borderRadius={20}
-        borderColor="$borderColor"
-        backgroundColor="$backgroundStrong"
-        alignItems="center"
-        justifyContent="center"
-      >
-        Theme: {themeName}
-      </Button>
-
+      </ScrollView>
     </YStack>
   );
 }

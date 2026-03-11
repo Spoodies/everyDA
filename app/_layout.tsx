@@ -3,7 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
-import { TamaguiProvider, Theme } from 'tamagui';
+import { TamaguiProvider, Theme, YStack } from 'tamagui';
+import { NavBar } from '../components/NavBar';
 import { AppThemeName, ThemeModeProvider } from '../components/theme-mode';
 import tamaguiConfig from '../tamagui.config.js';
 
@@ -71,7 +72,10 @@ export default function RootLayout() {
     <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
       <ThemeModeProvider value={themeModeValue}>
         <Theme name={themeName}>
-          <Stack screenOptions={{ headerShown: false }} />
+          <YStack flex={1}>
+            <Stack screenOptions={{ headerShown: false }} />
+            <NavBar />
+          </YStack>
         </Theme>
       </ThemeModeProvider>
     </TamaguiProvider>
