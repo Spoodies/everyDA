@@ -17,14 +17,14 @@ export function NavBar() {
       justifyContent="space-between"
       alignItems="center"
     >
-      <TouchableOpacity onPress={() => router.push('/')}>
+      <TouchableOpacity onPress={() => pathname !== '/' && router.push('/')}>
         <Home
           size={26}
           color={pathname === '/' ? '$color' : '$colorDisabled'}
         />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/settings')}>
+      <TouchableOpacity onPress={() => pathname !== '/settings' && router.push('/settings')}>
         <Settings
           size={26}
           color={pathname === '/settings' ? '$color' : '$colorDisabled'}
