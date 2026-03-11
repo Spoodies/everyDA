@@ -17,24 +17,21 @@ export default function SettingsScreen() {
       gap={16}
       alignItems="center"
       backgroundColor="$background"
-      justifyContent="space-between"
     >
-        <YStack>
-            <Text>Settings</Text>
-            <Button
-                onPress={cycleTheme}
-                width={cardWidth}
-                height={cardHeight}
-                borderWidth={2}
-                borderRadius={20}
-                borderColor="$borderColor"
-                backgroundColor="$backgroundStrong"
-                alignItems="center"
-                justifyContent="center"
-                >
-                Theme: {themeName}
-            </Button>
-        </ YStack>
+        <Text alignItems="center">Settings</Text>
+        <Button
+            onPress={cycleTheme}
+            width={cardWidth}
+            height={cardHeight}
+            borderWidth={2}
+            borderRadius={20}
+            borderColor="$borderColor"
+            backgroundColor="$backgroundStrong"
+            alignItems="center"
+            justifyContent="center"
+            >
+            Theme: {themeName}
+        </Button>
     </YStack>
 
   );
