@@ -69,7 +69,7 @@ export default function RootLayout() {
   );
 
   return (
-    <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
+    <TamaguiProvider config={tamaguiConfig} defaultTheme={defaultTheme}>
       <ThemeModeProvider value={themeModeValue}>
         <Theme name={themeName}>
           <YStack flex={1}>
