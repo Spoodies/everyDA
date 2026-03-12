@@ -8,12 +8,24 @@ import { Button, ScrollView, Text, YStack } from 'tamagui';
 import type { ExperimentKind } from '../components/AddExperimentModal';
 import { AddExperimentModal } from '../components/AddExperimentModal';
 
+type TimeEntry = {
+  timestamp: string;  // ISO string
+  duration: number;   // seconds, minutes, etc.
+};
+
+type EventEntry = {
+  timestamp: string;
+  label?: string;
+};
+
 type Experiment = {
   id: string;
   title: string;
   notes: string;
   kind: ExperimentKind;
+  data: TimeEntry[] | EventEntry[];
   createdAt: string;
+  lastEdited: string;
 };
 
 const STORAGE_KEY = 'experiments:v1';
@@ -58,12 +70,15 @@ export default function HomeScreen() {
       return;
     }
 
+    const now = new Date().toISOString();
     const nextItem: Experiment = {
       id: `${Date.now()}`,
       title: trimmedTitle,
       notes: trimmedNotes,
       kind,
-      createdAt: new Date().toISOString(),
+      data: [],
+      createdAt: now,
+      lastEdited: now,
     };
 
     const nextList = [nextItem, ...experiments];
