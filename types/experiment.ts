@@ -12,7 +12,7 @@ export type TimeEntry = {
 
 export type EventEntry = {
   timestamp: string;
-  label?: string;
+  count: number;
 };
 
 export type Experiment = {

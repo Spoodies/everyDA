@@ -3,38 +3,49 @@ import { Alert } from 'react-native';
 import { Button, Input, Text, XStack, YStack } from 'tamagui';
 import type { EntryContentRef, EventEntry } from '../../types/experiment';
 
-export const EventsEntryContent = forwardRef<EntryContentRef>(function EventsEntryContent(_, ref) {
-  const [mode, setMode] = useState<'manual' | 'auto'>('manual');
+interface EventsEntryContentProps {
+  onModeChange?: (mode: 'manual' | 'counter') => void;
+}
+
+export const EventsEntryContent = forwardRef<EntryContentRef, EventsEntryContentProps>(function EventsEntryContent({ onModeChange }, ref) {
+  const [mode, setMode] = useState<'manual' | 'counter'>('manual');
   const [count, setCount] = useState(0);
-  const [label, setLabel] = useState('');
+  const [inputValue, setInputValue] = useState('');
 
   useImperativeHandle(ref, () => ({
     submit(): EventEntry[] | null {
-      if (mode === 'auto' && count === 0) {
-        Alert.alert('No events', 'Tap + at least once before saving.');
+      if (mode === 'counter') {
         return null;
       }
-      const n = mode === 'auto' ? count : 1;
-      const trimmedLabel = label.trim() || undefined;
-      return Array.from({ length: n }, () => ({
-        timestamp: new Date().toISOString(),
-        label: trimmedLabel,
-      }));
+      const num = parseInt(inputValue, 10);
+      if (!num || num <= 0) {
+        Alert.alert('No events', 'Enter a number.');
+        return null;
+      }
+      return [
+        {
+          timestamp: new Date().toISOString(),
+          count: num,
+        }
+      ];
     },
     reset() {
       setMode('manual');
       setCount(0);
-      setLabel('');
+      setInputValue('');
     },
   }));
 
   return (
-    <YStack gap={12}>
+    <YStack gap={16}>
       <XStack gap={8}>
-        {(['manual', 'auto'] as const).map((m) => (
+        {(['manual', 'counter'] as const).map((m) => (
           <Button
             key={m}
-            onPress={() => setMode(m)}
+            onPress={() => {
+              setMode(m);
+              onModeChange?.(m);
+            }}
             borderWidth={1}
             borderRadius={20}
             borderColor="$borderColor"
@@ -42,53 +53,32 @@ export const EventsEntryContent = forwardRef<EntryContentRef>(function EventsEnt
             paddingHorizontal={14}
             size="$2"
           >
-            <Text color="$color" fontSize={13}>{m === 'auto' ? 'Counter' : 'Manual'}</Text>
+            <Text color="$color" fontSize={13}>{m === 'manual' ? 'Manual' : 'Counter'}</Text>
           </Button>
         ))}
       </XStack>
 
-      {mode === 'auto' && (
-        <XStack alignItems="center" gap={28} justifyContent="center">
-          <Button
-            onPress={() => setCount((c) => Math.max(0, c - 1))}
+      {mode === 'manual' ? (
+        <YStack gap={6}>
+          <Text fontSize={13} color="$colorHover">Number of events</Text>
+          <Input
+            value={inputValue}
+            onChangeText={setInputValue}
+            keyboardType="number-pad"
+            placeholder="e.g. 5"
+            paddingHorizontal={12}
+            paddingVertical={10}
             borderWidth={1}
-            borderRadius={999}
-            width={44}
-            height={44}
             borderColor="$borderColor"
-            backgroundColor="$backgroundStrong"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text color="$color" fontSize={22}>−</Text>
-          </Button>
-          <Text fontSize={52} fontWeight="200" color="$color">{count}</Text>
-          <Button
-            onPress={() => setCount((c) => c + 1)}
-            borderWidth={1}
-            borderRadius={999}
-            width={44}
-            height={44}
-            borderColor="$borderColor"
-            backgroundColor="$backgroundStrong"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text color="$color" fontSize={22}>+</Text>
-          </Button>
-        </XStack>
+            borderRadius={8}
+            color="$color"
+          />
+        </YStack>
+      ) : (
+        <YStack gap={12} alignItems="center">
+          <Text fontSize={13} color="$colorHover">Counter will start on screen</Text>
+        </YStack>
       )}
-
-      <Input
-        placeholder="Label (optional)"
-        value={label}
-        onChangeText={setLabel}
-        borderColor="$borderColor"
-        borderRadius={10}
-        color="$color"
-        backgroundColor="$background"
-        placeholderTextColor="$placeholderColor"
-      />
     </YStack>
   );
 });

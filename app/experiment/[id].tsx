@@ -9,7 +9,8 @@ import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
 import { STORAGE_KEY } from '../../types/experiment';
 
 export default function ExperimentDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id: string | string[] }>();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth * 0.8;
@@ -28,6 +29,10 @@ export default function ExperimentDetailScreen() {
   const timerStartRef = useRef<number>(0);
   const timerAccumRef = useRef<number>(0);
   const timerActive = timerRunning || timerElapsed > 0;
+
+  // Counter state
+  const [counterActive, setCounterActive] = useState(false);
+  const [counterCount, setCounterCount] = useState(0);
 
   useEffect(() => {
     if (timerRunning) {
@@ -60,6 +65,20 @@ export default function ExperimentDetailScreen() {
     setTimerElapsed(0);
     timerAccumRef.current = 0;
     addEntries([{ timestamp: new Date().toISOString(), duration }]);
+  };
+
+  const startCounter = () => {
+    setCounterCount(0);
+    setCounterActive(true);
+    setEntryModalVisible(false);
+  };
+
+  const finishCounter = () => {
+    if (counterCount > 0) {
+      addEntries([{ timestamp: new Date().toISOString(), count: counterCount }]);
+    }
+    setCounterActive(false);
+    setCounterCount(0);
   };
 
   useEffect(() => {
@@ -234,6 +253,7 @@ export default function ExperimentDetailScreen() {
         onClose={() => setEntryModalVisible(false)}
         onSave={addEntries}
         onStartTimer={startTimer}
+        onStartCounter={startCounter}
       />
 
       {/* Edit Entry Modal */}
@@ -358,6 +378,62 @@ export default function ExperimentDetailScreen() {
             </XStack>
           </YStack>
         )}
+
+        {/* Counter Running */}
+        {experiment.kind === 'Events' && counterActive && (
+          <YStack
+            width={cardWidth}
+            borderWidth={1}
+            borderRadius={12}
+            borderColor="$borderColor"
+            padding={16}
+            gap={12}
+            alignItems="center"
+          >
+            <Text fontSize={13} color="$colorHover">Counter</Text>
+            <Text fontSize={52} fontWeight="200" color="$color">
+              {counterCount}
+            </Text>
+            <XStack alignItems="center" gap={28} justifyContent="center">
+              <Button
+                onPress={() => setCounterCount((c) => Math.max(0, c - 1))}
+                borderWidth={1}
+                borderRadius={999}
+                width={44}
+                height={44}
+                borderColor="$borderColor"
+                backgroundColor="$backgroundStrong"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Text color="$color" fontSize={22}>−</Text>
+              </Button>
+              <Button
+                onPress={() => setCounterCount((c) => c + 1)}
+                borderWidth={1}
+                borderRadius={999}
+                width={44}
+                height={44}
+                borderColor="$borderColor"
+                backgroundColor="$backgroundStrong"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Text color="$color" fontSize={22}>+</Text>
+              </Button>
+            </XStack>
+            <Button
+              onPress={finishCounter}
+              borderWidth={1}
+              borderRadius={12}
+              borderColor="$borderColor"
+              backgroundColor="$backgroundStrong"
+              paddingHorizontal={40}
+            >
+              <Text color="$color">Finish</Text>
+            </Button>
+          </YStack>
+        )}
       </YStack>
 
       <Text fontSize={20} fontWeight="700" color="$color" textAlign="center" paddingTop={12}>Data</Text>
@@ -402,9 +478,9 @@ export default function ExperimentDetailScreen() {
                         {'duration' in entry && (
                           <Text fontSize={14} color="$color">Duration: {formatDuration(entry.duration)}</Text>
                         )}
-                        {'label' in entry && entry.label ? (
-                          <Text fontSize={14} color="$color">{entry.label}</Text>
-                        ) : null}
+                        {'count' in entry && (
+                          <Text fontSize={14} color="$color">Count: {entry.count}</Text>
+                        )}
                       </YStack>
                     </Button>
                   );
