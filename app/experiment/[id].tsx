@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Modal, Pressable, useWindowDimensions } from 'react-native';
 import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
 import { AddEntryModal } from '../../components/AddEntryModal';
+import { EditEntryModal } from '../../components/entry/EditEntryModal';
 import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
 import { STORAGE_KEY } from '../../types/experiment';
 
@@ -17,6 +18,8 @@ export default function ExperimentDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [entryModalVisible, setEntryModalVisible] = useState(false);
   const [infoVisible, setInfoVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
 
   // Timer state
   const [timerRunning, setTimerRunning] = useState(false);
@@ -118,6 +121,64 @@ export default function ExperimentDetailScreen() {
     }
   };
 
+  const deleteEntry = async (index: number) => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const list: Experiment[] = raw ? (JSON.parse(raw) as Experiment[]) : [];
+      const now = new Date().toISOString();
+      const updated = list.map((e) =>
+        e.id !== id
+          ? e
+          : {
+              ...e,
+              data: e.data.filter((_, i) => i !== index),
+              lastEdited: now,
+            }
+      );
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      setExperiment((prev) =>
+        prev
+          ? { ...prev, data: prev.data.filter((_, i) => i !== index), lastEdited: now }
+          : prev
+      );
+      setEditModalVisible(false);
+      setSelectedEntryIndex(null);
+    } catch {
+      Alert.alert('Delete failed', 'Could not delete entry.');
+    }
+  };
+
+  const updateEntry = async (index: number, updatedEntry: TimeEntry | EventEntry) => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const list: Experiment[] = raw ? (JSON.parse(raw) as Experiment[]) : [];
+      const now = new Date().toISOString();
+      const updated = list.map((e) =>
+        e.id !== id
+          ? e
+          : {
+              ...e,
+              data: e.data.map((entry, i) => (i === index ? updatedEntry : entry)),
+              lastEdited: now,
+            }
+      );
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      setExperiment((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: prev.data.map((entry, i) => (i === index ? updatedEntry : entry)),
+              lastEdited: now,
+            }
+          : prev
+      );
+      setEditModalVisible(false);
+      setSelectedEntryIndex(null);
+    } catch {
+      Alert.alert('Update failed', 'Could not update entry.');
+    }
+  };
+
   const createdAt = new Date(experiment.createdAt).toLocaleDateString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric',
     hour: 'numeric', minute: '2-digit',
@@ -174,6 +235,28 @@ export default function ExperimentDetailScreen() {
         onSave={addEntries}
         onStartTimer={startTimer}
       />
+
+      {/* Edit Entry Modal */}
+      {selectedEntryIndex !== null && experiment.data[selectedEntryIndex] && (
+        <Modal transparent animationType="fade" visible={editModalVisible} onRequestClose={() => setEditModalVisible(false)}>
+          <Pressable
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}
+            onPress={() => setEditModalVisible(false)}
+          >
+            <Pressable onPress={() => {}}>
+              <EditEntryModal
+                entry={experiment.data[selectedEntryIndex]}
+                kind={experiment.kind}
+                cardWidth={cardWidth}
+                onSave={(updatedEntry) => updateEntry(selectedEntryIndex, updatedEntry)}
+                onDelete={() => deleteEntry(selectedEntryIndex)}
+                onClose={() => setEditModalVisible(false)}
+              />
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
+
       {/* Info Modal */}
       <Modal transparent animationType="fade" visible={infoVisible} onRequestClose={() => setInfoVisible(false)}>
         <Pressable
@@ -296,27 +379,36 @@ export default function ExperimentDetailScreen() {
               </YStack>
             ) : (
               <XStack width={cardWidth} flexWrap="wrap" gap={10}>
-                {[...experiment.data].reverse().map((entry, i) => (
-                  <YStack
-                    key={i}
-                    width={entryCardWidth}
-                    backgroundColor="$backgroundStrong"
-                    borderColor="$borderColor"
-                    borderWidth={1}
-                    borderRadius={12}
-                    padding={12}
-                  >
-                    <Text fontSize={12} color="$colorHover">
-                      {formatRelativeTime(entry.timestamp)}
-                    </Text>
-                    {'duration' in entry && (
-                      <Text fontSize={14} color="$color">Duration: {formatDuration(entry.duration)}</Text>
-                    )}
-                    {'label' in entry && entry.label ? (
-                      <Text fontSize={14} color="$color">{entry.label}</Text>
-                    ) : null}
-                  </YStack>
-                ))}
+                {[...experiment.data].reverse().map((entry, i) => {
+                  const originalIndex = experiment.data.length - 1 - i;
+                  return (
+                    <Button
+                      key={i}
+                      width={entryCardWidth}
+                      backgroundColor="$backgroundStrong"
+                      borderColor="$borderColor"
+                      borderWidth={1}
+                      borderRadius={12}
+                      padding={12}
+                      onPress={() => {
+                        setSelectedEntryIndex(originalIndex);
+                        setEditModalVisible(true);
+                      }}
+                    >
+                      <YStack gap={4}>
+                        <Text fontSize={12} color="$colorHover">
+                          {formatRelativeTime(entry.timestamp)}
+                        </Text>
+                        {'duration' in entry && (
+                          <Text fontSize={14} color="$color">Duration: {formatDuration(entry.duration)}</Text>
+                        )}
+                        {'label' in entry && entry.label ? (
+                          <Text fontSize={14} color="$color">{entry.label}</Text>
+                        ) : null}
+                      </YStack>
+                    </Button>
+                  );
+                })}
               </XStack>
             )}
           </YStack>
