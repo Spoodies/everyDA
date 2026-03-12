@@ -300,9 +300,10 @@ export default function ExperimentDetailScreen() {
                   <YStack
                     key={i}
                     width={entryCardWidth}
+                    backgroundColor="$backgroundStrong"
+                    borderColor="$borderColor"
                     borderWidth={1}
                     borderRadius={12}
-                    borderColor="$borderColor"
                     padding={12}
                   >
                     <Text fontSize={12} color="$colorHover">
