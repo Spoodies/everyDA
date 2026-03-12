@@ -171,87 +171,89 @@ export default function ExperimentDetailScreen() {
         onSave={addEntries}
         onStartTimer={startTimer}
       />
+      <YStack alignItems="center" gap={16}>
+
+        {/* Title */}
+        <Text fontSize={26} fontWeight="700" color="$color" textAlign="center">
+          {experiment.title}
+        </Text>
+
+        {/* Kind badge */}
+        <YStack
+          borderWidth={1}
+          borderRadius={20}
+          borderColor="$borderColor"
+          backgroundColor="$backgroundStrong"
+          paddingHorizontal={14}
+          paddingVertical={4}
+        >
+          <Text fontSize={13} color="$color">{experiment.kind}</Text>
+        </YStack>
+
+        {/* Dates */}
+        <YStack width={cardWidth} gap={4}>
+          <Text fontSize={12} color="$colorHover">Created: {createdAt}</Text>
+          <Text fontSize={12} color="$colorHover">Last edited: {lastEdited}</Text>
+        </YStack>
+
+        {/* Notes */}
+        {experiment.notes ? (
+          <YStack
+            width={cardWidth}
+            borderWidth={1}
+            borderRadius={12}
+            borderColor="$borderColor"
+            padding={14}
+            gap={6}
+          >
+            <Text fontSize={13} color="$colorHover">Notes</Text>
+            <Text fontSize={15} color="$color">{experiment.notes}</Text>
+          </YStack>
+        ) : null}
+
+        {/* Currently Running */}
+        {experiment.kind === 'Times' && timerActive && (
+          <YStack
+            width={cardWidth}
+            borderWidth={1}
+            borderRadius={12}
+            borderColor="$borderColor"
+            padding={16}
+            gap={12}
+            alignItems="center"
+          >
+            <Text fontSize={13} color="$colorHover">Currently Running</Text>
+            <Text fontSize={52} fontWeight="200" color="$color">
+              {formatTimerDisplay(timerElapsed)}
+            </Text>
+            <XStack gap={12}>
+              <Button
+                onPress={timerRunning ? pauseTimer : () => setTimerRunning(true)}
+                borderWidth={1}
+                borderRadius={12}
+                borderColor="$borderColor"
+                backgroundColor="$background"
+                paddingHorizontal={20}
+              >
+                <Text color="$color">{timerRunning ? 'Pause' : 'Resume'}</Text>
+              </Button>
+              <Button
+                onPress={finishTimer}
+                borderWidth={1}
+                borderRadius={12}
+                borderColor="$borderColor"
+                backgroundColor="$backgroundStrong"
+                paddingHorizontal={20}
+              >
+                <Text color="$color">Finish</Text>
+              </Button>
+            </XStack>
+          </YStack>
+        )}
+      </YStack>
+
       <ScrollView flex={1} showsVerticalScrollIndicator={false}>
         <YStack alignItems="center" gap={16}>
-
-          {/* Title */}
-          <Text fontSize={26} fontWeight="700" color="$color" textAlign="center">
-            {experiment.title}
-          </Text>
-
-          {/* Kind badge */}
-          <YStack
-            borderWidth={1}
-            borderRadius={20}
-            borderColor="$borderColor"
-            backgroundColor="$backgroundStrong"
-            paddingHorizontal={14}
-            paddingVertical={4}
-          >
-            <Text fontSize={13} color="$color">{experiment.kind}</Text>
-          </YStack>
-
-          {/* Dates */}
-          <YStack width={cardWidth} gap={4}>
-            <Text fontSize={12} color="$colorHover">Created: {createdAt}</Text>
-            <Text fontSize={12} color="$colorHover">Last edited: {lastEdited}</Text>
-          </YStack>
-
-          {/* Notes */}
-          {experiment.notes ? (
-            <YStack
-              width={cardWidth}
-              borderWidth={1}
-              borderRadius={12}
-              borderColor="$borderColor"
-              padding={14}
-              gap={6}
-            >
-              <Text fontSize={13} color="$colorHover">Notes</Text>
-              <Text fontSize={15} color="$color">{experiment.notes}</Text>
-            </YStack>
-          ) : null}
-
-          {/* Currently Running */}
-          {experiment.kind === 'Times' && timerActive && (
-            <YStack
-              width={cardWidth}
-              borderWidth={1}
-              borderRadius={12}
-              borderColor="$borderColor"
-              padding={16}
-              gap={12}
-              alignItems="center"
-            >
-              <Text fontSize={13} color="$colorHover">Currently Running</Text>
-              <Text fontSize={52} fontWeight="200" color="$color">
-                {formatTimerDisplay(timerElapsed)}
-              </Text>
-              <XStack gap={12}>
-                <Button
-                  onPress={timerRunning ? pauseTimer : () => setTimerRunning(true)}
-                  borderWidth={1}
-                  borderRadius={12}
-                  borderColor="$borderColor"
-                  backgroundColor="$background"
-                  paddingHorizontal={20}
-                >
-                  <Text color="$color">{timerRunning ? 'Pause' : 'Resume'}</Text>
-                </Button>
-                <Button
-                  onPress={finishTimer}
-                  borderWidth={1}
-                  borderRadius={12}
-                  borderColor="$borderColor"
-                  backgroundColor="$backgroundStrong"
-                  paddingHorizontal={20}
-                >
-                  <Text color="$color">Finish</Text>
-                </Button>
-              </XStack>
-            </YStack>
-          )}
-
           {/* Data */}
           <YStack width={cardWidth} gap={10}>
             <Text fontSize={13} color="$colorHover">Data</Text>
