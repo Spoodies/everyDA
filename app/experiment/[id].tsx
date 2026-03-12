@@ -112,7 +112,6 @@ export default function ExperimentDetailScreen() {
           ? { ...prev, data: [...prev.data, ...(newEntries as typeof prev.data)], lastEdited: now }
           : prev
       );
-      setEntryModalVisible(false);
     } catch {
       Alert.alert('Save failed', 'Could not save entry.');
     }

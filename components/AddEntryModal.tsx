@@ -61,7 +61,7 @@ export function AddEntryModal({ visible, kind, onClose, onSave, onStartTimer }: 
               backgroundColor="$background"
               paddingHorizontal={16}
             >
-              <Text color="$color">Cancel</Text>
+              <Text color="$color">Close</Text>
             </Button>
             <Button
               onPress={handleSave}
@@ -71,7 +71,7 @@ export function AddEntryModal({ visible, kind, onClose, onSave, onStartTimer }: 
               backgroundColor="$backgroundStrong"
               paddingHorizontal={16}
             >
-              <Text color="$color">{kind === 'Times' && timesMode === 'auto' ? 'Start Timer' : 'Save'}</Text>
+              <Text color="$color">{kind === 'Times' && timesMode === 'auto' ? 'Start Timer' : 'Add'}</Text>
             </Button>
           </XStack>
         </YStack>
