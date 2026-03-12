@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { Alert, useWindowDimensions } from 'react-native';
 import { Button, ScrollView, Text, YStack } from 'tamagui';
-import type { Experiment } from '../../types/experiment';
+import { AddEntryModal } from '../../components/AddEntryModal';
+import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
 import { STORAGE_KEY } from '../../types/experiment';
 
 export default function ExperimentDetailScreen() {
@@ -14,6 +15,7 @@ export default function ExperimentDetailScreen() {
 
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [entryModalVisible, setEntryModalVisible] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -53,6 +55,28 @@ export default function ExperimentDetailScreen() {
     );
   }
 
+  const addEntries = async (newEntries: TimeEntry[] | EventEntry[]) => {
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const list: Experiment[] = raw ? (JSON.parse(raw) as Experiment[]) : [];
+      const now = new Date().toISOString();
+      const updated = list.map((e) =>
+        e.id !== id
+          ? e
+          : { ...e, data: [...(e.data ?? []), ...(newEntries as typeof e.data)], lastEdited: now }
+      );
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      setExperiment((prev) =>
+        prev
+          ? { ...prev, data: [...prev.data, ...(newEntries as typeof prev.data)], lastEdited: now }
+          : prev
+      );
+      setEntryModalVisible(false);
+    } catch {
+      Alert.alert('Save failed', 'Could not save entry.');
+    }
+  };
+
   const createdAt = new Date(experiment.createdAt).toLocaleDateString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric',
   });
@@ -68,6 +92,12 @@ export default function ExperimentDetailScreen() {
       paddingBottom={24}
       backgroundColor="$background"
     >
+      <AddEntryModal
+        visible={entryModalVisible}
+        kind={experiment.kind}
+        onClose={() => setEntryModalVisible(false)}
+        onSave={addEntries}
+      />
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack alignItems="center" gap={16}>
 
@@ -145,6 +175,20 @@ export default function ExperimentDetailScreen() {
               ))
             )}
           </YStack>
+
+            <Button
+                onPress={() => setEntryModalVisible(true)}
+                borderWidth={1}
+                width={50}
+                height={50}
+                borderRadius={25}
+                borderColor="$borderColor"
+                backgroundColor="$backgroundStrong"
+                alignItems="center"
+                justifyContent="center"
+            >
+                <Text>+</Text>
+            </Button>
 
         </YStack>
       </ScrollView>

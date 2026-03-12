@@ -1,5 +1,5 @@
 export const EXPERIMENT_KINDS = [
-  'Time',
+  'Times',
   'Events'
 ] as const;
 
