@@ -15,6 +15,7 @@ const themes = {
     color:                  '#111111',   // primary text
     colorHover:             '#333333',
     colorPress:             '#555555',
+    colorDestructive:       '#d63031',   // red for delete/destructive
     placeholderColor:       '#aaaaaa',
     borderColor:            '#000000',
     borderColorHover:       '#333333',
@@ -33,6 +34,7 @@ const themes = {
     color:                  '#eeeeee',   // primary text
     colorHover:             '#cccccc',
     colorPress:             '#aaaaaa',
+    colorDestructive:       '#ff6b6b',   // lighter red for dark theme
     placeholderColor:       '#666666',
     borderColor:            '#444444',
     borderColorHover:       '#666666',
@@ -51,6 +53,7 @@ const themes = {
     color:                  '#2f2416',   // dark brown text
     colorHover:             '#4a3a24',
     colorPress:             '#6b552f',
+    colorDestructive:       '#c23030',   // warm red for destructive
     placeholderColor:       '#aa9070',
     borderColor:            '#7a5a35',
     borderColorHover:       '#9a7045',
@@ -69,6 +72,7 @@ const themes = {
     color:                  '#e6f5ff',   // light blue-white text
     colorHover:             '#c8e8ff',
     colorPress:             '#a0d4f5',
+    colorDestructive:       '#ff6b6b',   // light red for ocean theme
     placeholderColor:       '#4a8099',
     borderColor:            '#2d6f8f',
     borderColorHover:       '#3d8faf',

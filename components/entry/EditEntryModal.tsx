@@ -104,12 +104,12 @@ export function EditEntryModal({
           onPress={onDelete}
           borderWidth={1}
           borderRadius={8}
-          borderColor="red"
-          backgroundColor="rgba(255, 0, 0, 0.1)"
+          borderColor="$colorDestructive"
+          backgroundColor="$backgroundStrong"
           paddingVertical={10}
           paddingHorizontal={16}
         >
-          <Text color="red" fontWeight="700">Delete</Text>
+          <Text color="$colorDestructive" fontWeight="700">Delete</Text>
         </Button>
       </XStack>
 
