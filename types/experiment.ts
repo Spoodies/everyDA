@@ -26,3 +26,8 @@ export type Experiment = {
 };
 
 export const STORAGE_KEY = 'experiments:v1';
+
+export interface EntryContentRef {
+  submit: () => TimeEntry[] | EventEntry[] | null;
+  reset: () => void;
+}
