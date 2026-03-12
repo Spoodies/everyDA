@@ -1,5 +1,5 @@
-import '@tamagui/native/setup-zeego';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import '@tamagui/native/setup-zeego';
 import { Stack } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
@@ -73,7 +73,7 @@ export default function RootLayout() {
       <ThemeModeProvider value={themeModeValue}>
         <Theme name={themeName}>
           <YStack flex={1}>
-            <Stack screenOptions={{ headerShown: false }} />
+            <Stack screenOptions={{ headerShown: false, animation: 'none', contentStyle: { backgroundColor: 'transparent' } }} />
             <NavBar />
           </YStack>
         </Theme>
