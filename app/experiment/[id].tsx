@@ -155,6 +155,8 @@ export default function ExperimentDetailScreen() {
     return `${diffWeeks}w ago`;
   };
 
+  const entryCardWidth = (cardWidth - 10) / 2;
+
   return (
     <YStack
       flex={1}
@@ -170,7 +172,7 @@ export default function ExperimentDetailScreen() {
         onSave={addEntries}
         onStartTimer={startTimer}
       />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView flex={1} showsVerticalScrollIndicator={false}>
         <YStack alignItems="center" gap={16}>
 
           {/* Title */}
@@ -266,44 +268,48 @@ export default function ExperimentDetailScreen() {
                 <Text fontSize={14} color="$colorHover">No entries yet.</Text>
               </YStack>
             ) : (
-              [...experiment.data].reverse().map((entry, i) => (
-                <YStack
-                  key={i}
-                  borderWidth={1}
-                  borderRadius={12}
-                  borderColor="$borderColor"
-                  padding={12}
-                >
-                  <Text fontSize={12} color="$colorHover">
-                    {formatRelativeTime(entry.timestamp)}
-                  </Text>
-                  {'duration' in entry && (
-                    <Text fontSize={14} color="$color">Duration: {formatDuration(entry.duration)}</Text>
-                  )}
-                  {'label' in entry && entry.label ? (
-                    <Text fontSize={14} color="$color">{entry.label}</Text>
-                  ) : null}
-                </YStack>
-              ))
+              <XStack width={cardWidth} flexWrap="wrap" gap={10}>
+                {[...experiment.data].reverse().map((entry, i) => (
+                  <YStack
+                    key={i}
+                    width={entryCardWidth}
+                    borderWidth={1}
+                    borderRadius={12}
+                    borderColor="$borderColor"
+                    padding={12}
+                  >
+                    <Text fontSize={12} color="$colorHover">
+                      {formatRelativeTime(entry.timestamp)}
+                    </Text>
+                    {'duration' in entry && (
+                      <Text fontSize={14} color="$color">Duration: {formatDuration(entry.duration)}</Text>
+                    )}
+                    {'label' in entry && entry.label ? (
+                      <Text fontSize={14} color="$color">{entry.label}</Text>
+                    ) : null}
+                  </YStack>
+                ))}
+              </XStack>
             )}
           </YStack>
-
-            <Button
-                onPress={() => setEntryModalVisible(true)}
-                borderWidth={1}
-                width={50}
-                height={50}
-                borderRadius={25}
-                borderColor="$borderColor"
-                backgroundColor="$backgroundStrong"
-                alignItems="center"
-                justifyContent="center"
-            >
-                <Text>+</Text>
-            </Button>
-
         </YStack>
       </ScrollView>
+
+      <YStack alignItems="center" paddingTop={12}>
+        <Button
+          onPress={() => setEntryModalVisible(true)}
+          borderWidth={1}
+          width={50}
+          height={50}
+          borderRadius={25}
+          borderColor="$borderColor"
+          backgroundColor="$backgroundStrong"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Text>+</Text>
+        </Button>
+      </YStack>
     </YStack>
   );
 }
