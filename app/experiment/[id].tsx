@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, useWindowDimensions } from 'react-native';
+import { Alert, Modal, Pressable, useWindowDimensions } from 'react-native';
 import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
 import { AddEntryModal } from '../../components/AddEntryModal';
 import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
@@ -16,6 +16,7 @@ export default function ExperimentDetailScreen() {
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [loading, setLoading] = useState(true);
   const [entryModalVisible, setEntryModalVisible] = useState(false);
+  const [infoVisible, setInfoVisible] = useState(false);
 
   // Timer state
   const [timerRunning, setTimerRunning] = useState(false);
@@ -119,9 +120,11 @@ export default function ExperimentDetailScreen() {
 
   const createdAt = new Date(experiment.createdAt).toLocaleDateString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit',
   });
   const lastEdited = new Date(experiment.lastEdited).toLocaleDateString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit',
   });
 
   const formatDuration = (secs: number) => {
@@ -171,12 +174,55 @@ export default function ExperimentDetailScreen() {
         onSave={addEntries}
         onStartTimer={startTimer}
       />
+      {/* Info Modal */}
+      <Modal transparent animationType="fade" visible={infoVisible} onRequestClose={() => setInfoVisible(false)}>
+        <Pressable
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}
+          onPress={() => setInfoVisible(false)}
+        >
+          <Pressable onPress={() => {}}>
+            <YStack
+              backgroundColor="$backgroundStrong"
+              borderWidth={1}
+              borderColor="$borderColor"
+              borderRadius={16}
+              padding={20}
+              gap={10}
+              width={cardWidth}
+            >
+              <Text fontSize={13} color="$colorHover">Created: {createdAt}</Text>
+              <Text fontSize={13} color="$colorHover">Last edited: {lastEdited}</Text>
+              {experiment.notes ? (
+                <YStack gap={4} marginTop={4}>
+                  <Text fontSize={13} color="$colorHover">Notes</Text>
+                  <Text fontSize={15} color="$color">{experiment.notes}</Text>
+                </YStack>
+              ) : null}
+            </YStack>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <YStack alignItems="center" gap={16}>
 
-        {/* Title */}
-        <Text fontSize={26} fontWeight="700" color="$color" textAlign="center">
-          {experiment.title}
-        </Text>
+        {/* Title row */}
+        <XStack width={cardWidth} alignItems="center" justifyContent="center">
+          <YStack flex={1} />
+          <Text fontSize={26} fontWeight="700" color="$color" textAlign="center" flex={0}>
+            {experiment.title}
+          </Text>
+          <YStack flex={1} alignItems="flex-end">
+            <Pressable
+              onPress={() => setInfoVisible(true)}
+              style={{
+                width: 26, height: 26, borderRadius: 13,
+                borderWidth: 1, alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 13, color: 'gray' }}>i</Text>
+            </Pressable>
+          </YStack>
+        </XStack>
 
         {/* Kind badge */}
         <YStack
@@ -189,27 +235,6 @@ export default function ExperimentDetailScreen() {
         >
           <Text fontSize={13} color="$color">{experiment.kind}</Text>
         </YStack>
-
-        {/* Dates */}
-        <YStack width={cardWidth} gap={4}>
-          <Text fontSize={12} color="$colorHover">Created: {createdAt}</Text>
-          <Text fontSize={12} color="$colorHover">Last edited: {lastEdited}</Text>
-        </YStack>
-
-        {/* Notes */}
-        {experiment.notes ? (
-          <YStack
-            width={cardWidth}
-            borderWidth={1}
-            borderRadius={12}
-            borderColor="$borderColor"
-            padding={14}
-            gap={6}
-          >
-            <Text fontSize={13} color="$colorHover">Notes</Text>
-            <Text fontSize={15} color="$color">{experiment.notes}</Text>
-          </YStack>
-        ) : null}
 
         {/* Currently Running */}
         {experiment.kind === 'Times' && timerActive && (
