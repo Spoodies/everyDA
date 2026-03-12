@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Modal, StyleSheet } from 'react-native';
 import { Button, Text, XStack, YStack } from 'tamagui';
 import type { EntryContentRef, EventEntry, ExperimentKind, TimeEntry } from '../types/experiment';
@@ -10,10 +10,12 @@ type Props = {
   kind: ExperimentKind;
   onClose: () => void;
   onSave: (entries: TimeEntry[] | EventEntry[]) => void;
+  onStartTimer?: () => void;
 };
 
-export function AddEntryModal({ visible, kind, onClose, onSave }: Props) {
+export function AddEntryModal({ visible, kind, onClose, onSave, onStartTimer }: Props) {
   const contentRef = useRef<EntryContentRef>(null);
+  const [timesMode, setTimesMode] = useState<'manual' | 'auto'>('manual');
 
   const handleClose = () => {
     contentRef.current?.reset();
@@ -21,6 +23,11 @@ export function AddEntryModal({ visible, kind, onClose, onSave }: Props) {
   };
 
   const handleSave = () => {
+    if (kind === 'Times' && timesMode === 'auto') {
+      onStartTimer?.();
+      contentRef.current?.reset();
+      return;
+    }
     const entries = contentRef.current?.submit();
     if (!entries) return;
     onSave(entries);
@@ -42,7 +49,7 @@ export function AddEntryModal({ visible, kind, onClose, onSave }: Props) {
         >
           <Text fontSize={18} fontWeight="600" color="$color">Add Entry</Text>
 
-          {kind === 'Times' && <TimesEntryContent ref={contentRef} />}
+          {kind === 'Times' && <TimesEntryContent ref={contentRef} onModeChange={setTimesMode} />}
           {kind === 'Events' && <EventsEntryContent ref={contentRef} />}
 
           <XStack gap={10} justifyContent="flex-end">
@@ -64,7 +71,7 @@ export function AddEntryModal({ visible, kind, onClose, onSave }: Props) {
               backgroundColor="$backgroundStrong"
               paddingHorizontal={16}
             >
-              <Text color="$color">Save</Text>
+              <Text color="$color">{kind === 'Times' && timesMode === 'auto' ? 'Start Timer' : 'Save'}</Text>
             </Button>
           </XStack>
         </YStack>

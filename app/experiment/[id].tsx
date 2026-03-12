@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, useWindowDimensions } from 'react-native';
-import { Button, ScrollView, Text, YStack } from 'tamagui';
+import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
 import { AddEntryModal } from '../../components/AddEntryModal';
 import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
 import { STORAGE_KEY } from '../../types/experiment';
@@ -16,6 +16,47 @@ export default function ExperimentDetailScreen() {
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [loading, setLoading] = useState(true);
   const [entryModalVisible, setEntryModalVisible] = useState(false);
+
+  // Timer state
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerElapsed, setTimerElapsed] = useState(0);
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerStartRef = useRef<number>(0);
+  const timerAccumRef = useRef<number>(0);
+  const timerActive = timerRunning || timerElapsed > 0;
+
+  useEffect(() => {
+    if (timerRunning) {
+      timerStartRef.current = Date.now();
+      timerIntervalRef.current = setInterval(() => {
+        const wallElapsed = (Date.now() - timerStartRef.current) / 1000;
+        setTimerElapsed(+(timerAccumRef.current + wallElapsed).toFixed(2));
+      }, 50);
+    }
+    return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
+  }, [timerRunning]);
+
+  const startTimer = () => {
+    timerAccumRef.current = 0;
+    setTimerElapsed(0);
+    setTimerRunning(true);
+    setEntryModalVisible(false);
+  };
+
+  const pauseTimer = () => {
+    const wallElapsed = (Date.now() - timerStartRef.current) / 1000;
+    timerAccumRef.current = timerAccumRef.current + wallElapsed;
+    setTimerRunning(false);
+  };
+
+  const finishTimer = () => {
+    const wallElapsed = timerRunning ? (Date.now() - timerStartRef.current) / 1000 : 0;
+    const duration = +(timerAccumRef.current + wallElapsed).toFixed(2);
+    setTimerRunning(false);
+    setTimerElapsed(0);
+    timerAccumRef.current = 0;
+    addEntries([{ timestamp: new Date().toISOString(), duration }]);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -84,6 +125,19 @@ export default function ExperimentDetailScreen() {
     year: 'numeric', month: 'short', day: 'numeric',
   });
 
+  const formatDuration = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = (secs % 60).toFixed(1);
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  };
+
+  const formatTimerDisplay = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60).toString().padStart(2, '0');
+    const cs = Math.round((secs % 1) * 100).toString().padStart(2, '0');
+    return m > 0 ? `${m}:${s}.${cs}` : `${s}.${cs}`;
+  };
+
   return (
     <YStack
       flex={1}
@@ -97,6 +151,7 @@ export default function ExperimentDetailScreen() {
         kind={experiment.kind}
         onClose={() => setEntryModalVisible(false)}
         onSave={addEntries}
+        onStartTimer={startTimer}
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack alignItems="center" gap={16}>
@@ -139,6 +194,46 @@ export default function ExperimentDetailScreen() {
             </YStack>
           ) : null}
 
+          {/* Currently Running */}
+          {experiment.kind === 'Times' && timerActive && (
+            <YStack
+              width={cardWidth}
+              borderWidth={1}
+              borderRadius={12}
+              borderColor="$borderColor"
+              padding={16}
+              gap={12}
+              alignItems="center"
+            >
+              <Text fontSize={13} color="$colorHover">Currently Running</Text>
+              <Text fontSize={52} fontWeight="200" color="$color">
+                {formatTimerDisplay(timerElapsed)}
+              </Text>
+              <XStack gap={12}>
+                <Button
+                  onPress={timerRunning ? pauseTimer : () => setTimerRunning(true)}
+                  borderWidth={1}
+                  borderRadius={12}
+                  borderColor="$borderColor"
+                  backgroundColor="$background"
+                  paddingHorizontal={20}
+                >
+                  <Text color="$color">{timerRunning ? 'Pause' : 'Resume'}</Text>
+                </Button>
+                <Button
+                  onPress={finishTimer}
+                  borderWidth={1}
+                  borderRadius={12}
+                  borderColor="$borderColor"
+                  backgroundColor="$backgroundStrong"
+                  paddingHorizontal={20}
+                >
+                  <Text color="$color">Finish</Text>
+                </Button>
+              </XStack>
+            </YStack>
+          )}
+
           {/* Data */}
           <YStack width={cardWidth} gap={10}>
             <Text fontSize={13} color="$colorHover">Data</Text>
@@ -166,7 +261,7 @@ export default function ExperimentDetailScreen() {
                     {new Date(entry.timestamp).toLocaleString()}
                   </Text>
                   {'duration' in entry && (
-                    <Text fontSize={14} color="$color">Duration: {entry.duration}s</Text>
+                    <Text fontSize={14} color="$color">Duration: {formatDuration(entry.duration)}</Text>
                   )}
                   {'label' in entry && entry.label ? (
                     <Text fontSize={14} color="$color">{entry.label}</Text>
