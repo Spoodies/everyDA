@@ -1,36 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Alert,
   useWindowDimensions
 } from 'react-native';
 import { Button, ScrollView, Text, YStack } from 'tamagui';
-import type { ExperimentKind } from '../components/AddExperimentModal';
 import { AddExperimentModal } from '../components/AddExperimentModal';
-
-type TimeEntry = {
-  timestamp: string;  // ISO string
-  duration: number;   // seconds, minutes, etc.
-};
-
-type EventEntry = {
-  timestamp: string;
-  label?: string;
-};
-
-type Experiment = {
-  id: string;
-  title: string;
-  notes: string;
-  kind: ExperimentKind;
-  data: TimeEntry[] | EventEntry[];
-  createdAt: string;
-  lastEdited: string;
-};
-
-const STORAGE_KEY = 'experiments:v1';
+import type { Experiment, ExperimentKind } from '../types/experiment';
+import { STORAGE_KEY } from '../types/experiment';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth * 0.8;
   const cardHeight = Math.min(cardWidth / 5, 70);
@@ -116,6 +97,7 @@ export default function HomeScreen() {
         {experiments.map((experiment) => (
           <Button
             key={experiment.id}
+            onPress={() => router.push({ pathname: '/experiment/[id]', params: { id: experiment.id } })}
             width={cardWidth}
             height={cardHeight}
             borderWidth={2}

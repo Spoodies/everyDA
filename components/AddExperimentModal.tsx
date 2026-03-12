@@ -1,15 +1,8 @@
 import { useState } from 'react';
 import { Modal, StyleSheet } from 'react-native';
 import { Button, Input, Text, TextArea, XStack, YStack } from 'tamagui';
-
-// ── Edit this list to define your experiment kinds ──────────────────────────
-export const EXPERIMENT_KINDS = [
-  'Time',
-  'Events'
-] as const;
-
-export type ExperimentKind = (typeof EXPERIMENT_KINDS)[number];
-// ────────────────────────────────────────────────────────────────────────────
+import { EXPERIMENT_KINDS } from '../types/experiment';
+import type { ExperimentKind } from '../types/experiment';
 
 type Props = {
   visible: boolean;
