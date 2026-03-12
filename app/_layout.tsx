@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { TamaguiProvider, Theme, YStack } from 'tamagui';
+import { ActiveTabContext, type ActiveTab } from '../components/active-tab';
 import { NavBar } from '../components/NavBar';
 import { AppThemeName, ThemeModeProvider } from '../components/theme-mode';
 import tamaguiConfig from '../tamagui.config.js';
@@ -68,14 +69,20 @@ export default function RootLayout() {
     [themeName]
   );
 
+  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
+
+  const activeTabValue = useMemo(() => ({ activeTab, setActiveTab }), [activeTab]);
+
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme={defaultTheme}>
       <ThemeModeProvider value={themeModeValue}>
         <Theme name={themeName}>
-          <YStack flex={1}>
-            <Stack screenOptions={{ headerShown: false, animation: 'none', contentStyle: { backgroundColor: 'transparent' } }} />
-            <NavBar />
-          </YStack>
+          <ActiveTabContext.Provider value={activeTabValue}>
+            <YStack flex={1}>
+              <Stack screenOptions={{ headerShown: false, animation: 'none', contentStyle: { backgroundColor: 'transparent' } }} />
+              <NavBar />
+            </YStack>
+          </ActiveTabContext.Provider>
         </Theme>
       </ThemeModeProvider>
     </TamaguiProvider>

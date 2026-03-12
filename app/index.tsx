@@ -7,11 +7,14 @@ import {
 } from 'react-native';
 import { Button, ScrollView, Text, YStack } from 'tamagui';
 import { AddExperimentModal } from '../components/AddExperimentModal';
+import { useActiveTab } from '../components/active-tab';
 import type { Experiment, ExperimentKind } from '../types/experiment';
 import { STORAGE_KEY } from '../types/experiment';
+import SettingsScreen from './settings';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { activeTab } = useActiveTab();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth * 0.8;
   const cardHeight = Math.min(cardWidth / 5, 70);
@@ -75,6 +78,8 @@ export default function HomeScreen() {
       setSaving(false);
     }
   };
+
+  if (activeTab === 'settings') return <SettingsScreen />;
 
   return (
     <YStack
