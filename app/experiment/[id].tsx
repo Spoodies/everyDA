@@ -252,11 +252,12 @@ export default function ExperimentDetailScreen() {
         )}
       </YStack>
 
+      <Text fontSize={20} fontWeight="700" color="$color" textAlign="center" paddingTop={12}>Data</Text>
+
       <ScrollView flex={1} showsVerticalScrollIndicator={false}>
         <YStack alignItems="center" gap={16}>
           {/* Data */}
           <YStack width={cardWidth} gap={10}>
-            <Text fontSize={13} color="$colorHover">Data</Text>
             {experiment.data.length === 0 ? (
               <YStack
                 borderWidth={1}
