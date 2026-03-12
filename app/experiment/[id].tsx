@@ -132,7 +132,7 @@ export default function ExperimentDetailScreen() {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       setExperiment((prev) =>
         prev
-          ? { ...prev, data: [...prev.data, ...(newEntries as typeof prev.data)], lastEdited: now }
+          ? { ...prev, data: [...prev.data, ...(newEntries as typeof prev.data)] as typeof prev.data, lastEdited: now }
           : prev
       );
     } catch {
@@ -157,7 +157,7 @@ export default function ExperimentDetailScreen() {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       setExperiment((prev) =>
         prev
-          ? { ...prev, data: prev.data.filter((_, i) => i !== index), lastEdited: now }
+          ? { ...prev, data: prev.data.filter((_, i) => i !== index) as typeof prev.data, lastEdited: now }
           : prev
       );
       setEditModalVisible(false);
@@ -186,7 +186,7 @@ export default function ExperimentDetailScreen() {
         prev
           ? {
               ...prev,
-              data: prev.data.map((entry, i) => (i === index ? updatedEntry : entry)),
+              data: prev.data.map((entry, i) => (i === index ? updatedEntry : entry)) as typeof prev.data,
               lastEdited: now,
             }
           : prev
