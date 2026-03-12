@@ -138,6 +138,23 @@ export default function ExperimentDetailScreen() {
     return m > 0 ? `${m}:${s}.${cs}` : `${s}.${cs}`;
   };
 
+  const formatRelativeTime = (timestamp: string) => {
+    const now = Date.now();
+    const then = new Date(timestamp).getTime();
+    const diffMs = now - then;
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+
+    if (diffSecs < 60) return `${diffSecs}s ago`;
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return `${diffWeeks}w ago`;
+  };
+
   return (
     <YStack
       flex={1}
@@ -249,7 +266,7 @@ export default function ExperimentDetailScreen() {
                 <Text fontSize={14} color="$colorHover">No entries yet.</Text>
               </YStack>
             ) : (
-              experiment.data.map((entry, i) => (
+              [...experiment.data].reverse().map((entry, i) => (
                 <YStack
                   key={i}
                   borderWidth={1}
@@ -258,7 +275,7 @@ export default function ExperimentDetailScreen() {
                   padding={12}
                 >
                   <Text fontSize={12} color="$colorHover">
-                    {new Date(entry.timestamp).toLocaleString()}
+                    {formatRelativeTime(entry.timestamp)}
                   </Text>
                   {'duration' in entry && (
                     <Text fontSize={14} color="$color">Duration: {formatDuration(entry.duration)}</Text>
