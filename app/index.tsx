@@ -94,7 +94,7 @@ export default function HomeScreen() {
       />
       <ScrollView showsVerticalScrollIndicator={false}>
       <YStack>
-        {experiments.map((experiment) => (
+        {experiments.sort((a, b) => new Date(b.lastEdited).getTime() - new Date(a.lastEdited).getTime()).map((experiment) => (
           <Button
             key={experiment.id}
             onPress={() => router.push({ pathname: '/experiment/[id]', params: { id: experiment.id } })}
