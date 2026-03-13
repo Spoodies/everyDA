@@ -11,14 +11,14 @@ import { STORAGE_KEY } from '../../types/experiment';
 import { formatStatDisplay } from '../../utils/statistics';
 
 const STAT_OPTIONS = [
-  { id: 'sum', label: 'Sum' },
-  { id: 'mean', label: 'Mean' },
-  { id: 'median', label: 'Median' },
-  { id: 'mode', label: 'Mode' },
-  { id: 'confint', label: 'Confint' },
-  { id: 'predint', label: 'Predint' },
-  { id: 'stddev', label: 'Stddev' },
-  { id: 'entry_count', label: 'Entry Count' },
+  { id: 'sum', label: 'Sum', description: 'Sum adds all recorded values together.' },
+  { id: 'mean', label: 'Mean', description: 'Mean is the average of all values: sum ÷ count.' },
+  { id: 'median', label: 'Median', description: 'Median is the middle value after sorting the data.' },
+  { id: 'mode', label: 'Mode', description: 'Mode is the value that appears most often.' },
+  { id: 'confint', label: 'Confint', description: '95% confidence interval of the mean: mean ± 1.96 × (stddev / √n).' },
+  { id: 'predint', label: 'Predint', description: '95% prediction interval for a new value: mean ± 1.96 × stddev × √(1 + 1/n).' },
+  { id: 'stddev', label: 'Stddev', description: 'Sample standard deviation measures spread around the mean.' },
+  { id: 'entry_count', label: 'Entry Count', description: 'Entry Count is the number of recorded entries.' },
 ];
 
 export default function ExperimentDetailScreen() {

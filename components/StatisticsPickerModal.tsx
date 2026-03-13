@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, StyleSheet } from 'react-native';
+import { Alert, Modal, StyleSheet } from 'react-native';
 import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
 import type { EventEntry, ExperimentKind, TimeEntry } from '../types/experiment';
 import { formatStatDisplay } from '../utils/statistics';
@@ -7,6 +7,7 @@ import { formatStatDisplay } from '../utils/statistics';
 export type StatisticOption = {
   id: string;
   label: string;
+  description: string;
 };
 
 type Props = {
@@ -45,6 +46,10 @@ export function StatisticsPickerModal({
     .filter((option): option is StatisticOption => Boolean(option));
 
   const availableOptions = options.filter((option) => !draftSelected.includes(option.id));
+
+  const showStatInfo = (option: StatisticOption) => {
+    Alert.alert(option.label, option.description);
+  };
 
   const toggleStat = (statId: string) => {
     setDraftSelected((current) =>
@@ -128,8 +133,8 @@ export function StatisticsPickerModal({
                           paddingHorizontal={0}
                           justifyContent="flex-start"
                         >
-                          <XStack width="100%" justifyContent="space-between" alignItems="center">
-                            <Text color="$color">{option.label}</Text>
+                          <XStack width="100%" justifyContent="space-between" alignItems="center" gap={8}>
+                            <Text color="$color" flex={1}>{option.label}</Text>
                             <Text color="$colorHover">{formatStatDisplay(option.id, data, kind)}</Text>
                           </XStack>
                         </Button>
@@ -171,21 +176,44 @@ export function StatisticsPickerModal({
                 <Text fontSize={13} color="$colorHover">Available</Text>
                 <YStack gap={8}>
                   {availableOptions.map((option) => (
-                    <Button
+                    <XStack
                       key={option.id}
-                      onPress={() => toggleStat(option.id)}
+                      alignItems="center"
+                      gap={8}
                       borderWidth={1}
                       borderRadius={10}
                       borderColor="$borderColor"
                       backgroundColor="$backgroundStrong"
-                      justifyContent="flex-start"
+                      paddingVertical={6}
                       paddingHorizontal={12}
                     >
-                      <XStack width="100%" justifyContent="space-between" alignItems="center">
-                        <Text color="$color">{option.label}</Text>
-                        <Text color="$colorHover">{formatStatDisplay(option.id, data, kind)}</Text>
-                      </XStack>
-                    </Button>
+                      <Button
+                        onPress={() => toggleStat(option.id)}
+                        flex={1}
+                        borderWidth={0}
+                        backgroundColor="transparent"
+                        paddingHorizontal={0}
+                        justifyContent="flex-start"
+                      >
+                        <XStack width="100%" justifyContent="space-between" alignItems="center" gap={8}>
+                          <Text color="$color" flex={1}>{option.label}</Text>
+                          <Text color="$colorHover">{formatStatDisplay(option.id, data, kind)}</Text>
+                        </XStack>
+                      </Button>
+                      <Button
+                        onPress={() => showStatInfo(option)}
+                        marginLeft={2}
+                        borderWidth={1}
+                        borderRadius={999}
+                        borderColor="$borderColor"
+                        backgroundColor="$background"
+                        height={30}
+                        width={30}
+                        paddingHorizontal={0}
+                      >
+                        <Text color="$colorHover">i</Text>
+                      </Button>
+                    </XStack>
                   ))}
                 </YStack>
               </YStack>
