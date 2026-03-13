@@ -2,10 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
-    Alert,
-    useWindowDimensions
+  Alert,
+  useWindowDimensions
 } from 'react-native';
-import { Button, ScrollView, Text, YStack } from 'tamagui';
+import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
 import { AddExperimentModal } from '../components/AddExperimentModal';
 import { useActiveTab } from '../components/active-tab';
 import type { Experiment, ExperimentKind } from '../types/experiment';
@@ -23,6 +23,11 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const formatKindLabel = (kind: ExperimentKind) => {
+    const lower = kind.toLowerCase();
+    return lower.charAt(0).toUpperCase() + lower.slice(1);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -112,10 +117,26 @@ export default function HomeScreen() {
             marginBottom={15}
             borderColor="$borderColor"
             backgroundColor="$backgroundButton"
-            alignItems="center"
+            alignItems="stretch"
             justifyContent="center"
+            paddingHorizontal={16}
           >
-            <Text color="$color">{experiment.title || 'Hello'}</Text>
+            <XStack alignItems="center" justifyContent="space-between" width="100%">
+              <Text color="$color" numberOfLines={1} flex={1} marginRight={12}>
+                {experiment.title || 'Hello'}
+              </Text>
+              <Text
+                color="$color"
+                borderWidth={1}
+                borderColor="$borderColor"
+                borderRadius={999}
+                paddingHorizontal={10}
+                paddingVertical={2}
+                fontSize={12}
+              >
+                {formatKindLabel(experiment.kind)}
+              </Text>
+            </XStack>
           </Button>
         ))}
         <Button
