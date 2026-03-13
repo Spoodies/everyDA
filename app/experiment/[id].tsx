@@ -19,6 +19,7 @@ export default function ExperimentDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [entryModalVisible, setEntryModalVisible] = useState(false);
   const [infoVisible, setInfoVisible] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
 
@@ -278,10 +279,10 @@ export default function ExperimentDetailScreen() {
       )}
 
       {/* Info Modal */}
-      <Modal transparent animationType="fade" visible={infoVisible} onRequestClose={() => setInfoVisible(false)}>
+      <Modal transparent animationType="fade" visible={infoVisible} onRequestClose={() => { setInfoVisible(false); setDeleteConfirm(false); }}>
         <Pressable
           style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}
-          onPress={() => setInfoVisible(false)}
+          onPress={() => { setInfoVisible(false); setDeleteConfirm(false); }}
         >
           <Pressable onPress={() => {}}>
             <YStack
@@ -301,6 +302,41 @@ export default function ExperimentDetailScreen() {
                   <Text fontSize={15} color="$color">{experiment.notes}</Text>
                 </YStack>
               ) : null}
+              <Pressable
+                onPress={async () => {
+                  if (!deleteConfirm) {
+                    setDeleteConfirm(true);
+                  } else {
+                    try {
+                      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+                      const list: Experiment[] = raw ? (JSON.parse(raw) as Experiment[]) : [];
+                      const updated = list.filter((e) => e.id !== id);
+                      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                    } catch {
+                      Alert.alert('Delete failed', 'Could not delete experiment.');
+                      return;
+                    }
+                    setInfoVisible(false);
+                    setDeleteConfirm(false);
+                    router.back();
+                  }
+                }}
+                style={{ marginTop: 8 }}
+              >
+                <YStack
+                  marginTop={0}
+                  alignItems="center"
+                  borderWidth={1}
+                  borderColor="$colorDestructive"
+                  borderRadius={8}
+                  paddingVertical={8}
+                  paddingHorizontal={20}
+                >
+                  <Text fontSize={13} color={deleteConfirm ? '$colorDestructive' : '$colorHover'}>
+                    {deleteConfirm ? 'Are you sure?' : 'Delete'}
+                  </Text>
+                </YStack>
+              </Pressable>
             </YStack>
           </Pressable>
         </Pressable>

@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
-  Alert,
-  useWindowDimensions
+    Alert,
+    useWindowDimensions
 } from 'react-native';
 import { Button, ScrollView, Text, YStack } from 'tamagui';
 import { AddExperimentModal } from '../components/AddExperimentModal';
@@ -24,26 +24,28 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    const loadExperiments = async () => {
-      try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (!raw) {
+  useFocusEffect(
+    useCallback(() => {
+      const loadExperiments = async () => {
+        try {
+          const raw = await AsyncStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            setExperiments([]);
+            return;
+          }
+
+          const parsed = JSON.parse(raw) as Experiment[];
+          setExperiments(Array.isArray(parsed) ? parsed : []);
+        } catch {
           setExperiments([]);
-          return;
+        } finally {
+          setLoading(false);
         }
+      };
 
-        const parsed = JSON.parse(raw) as Experiment[];
-        setExperiments(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setExperiments([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadExperiments();
-  }, []);
+      loadExperiments();
+    }, [])
+  );
 
   const addExperiment = async (title: string, notes: string, kind: ExperimentKind) => {
     const trimmedTitle = title.trim();
