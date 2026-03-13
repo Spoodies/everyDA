@@ -21,6 +21,7 @@ export type Experiment = {
   notes: string;
   kind: ExperimentKind;
   data: TimeEntry[] | EventEntry[];
+  selectedStats?: string[];
   createdAt: string;
   lastEdited: string;
 };

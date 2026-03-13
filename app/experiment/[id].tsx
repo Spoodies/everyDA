@@ -4,9 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Modal, Pressable, useWindowDimensions } from 'react-native';
 import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
 import { AddEntryModal } from '../../components/AddEntryModal';
+import { StatisticsPickerModal } from '../../components/StatisticsPickerModal';
 import { EditEntryModal } from '../../components/entry/EditEntryModal';
 import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
 import { STORAGE_KEY } from '../../types/experiment';
+
+const STAT_OPTIONS = [
+  { id: 'total', label: 'Total' },
+  { id: 'sum', label: 'Sum' },
+  { id: 'mean', label: 'Mean' },
+  { id: 'median', label: 'Median' },
+  { id: 'mode', label: 'Mode' },
+  { id: 'confint', label: 'Confint' },
+  { id: 'stddev', label: 'Stddev' },
+  { id: 'entry_count', label: 'Entry Count' },
+];
 
 export default function ExperimentDetailScreen() {
   const params = useLocalSearchParams<{ id: string | string[] }>();
@@ -22,6 +34,7 @@ export default function ExperimentDetailScreen() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
+  const [statisticsModalVisible, setStatisticsModalVisible] = useState(false);
 
   // Timer state
   const [timerRunning, setTimerRunning] = useState(false);
@@ -91,6 +104,7 @@ export default function ExperimentDetailScreen() {
         const found = parsed.find((e) => e.id === id) ?? null;
         if (found) {
           found.data ??= [];
+          found.selectedStats ??= [];
           found.lastEdited ??= found.createdAt;
         }
         setExperiment(found);
@@ -199,6 +213,39 @@ export default function ExperimentDetailScreen() {
     }
   };
 
+  const updateSelectedStats = async (selectedStats: string[]) => {
+    try {
+      const allowed = new Set(STAT_OPTIONS.map((option) => option.id));
+      const normalized = selectedStats.filter((id) => allowed.has(id));
+
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const list: Experiment[] = raw ? (JSON.parse(raw) as Experiment[]) : [];
+      const now = new Date().toISOString();
+      const updated = list.map((e) =>
+        e.id !== id
+          ? e
+          : {
+              ...e,
+              selectedStats: normalized,
+              lastEdited: now,
+            }
+      );
+
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      setExperiment((prev) =>
+        prev
+          ? {
+              ...prev,
+              selectedStats: normalized,
+              lastEdited: now,
+            }
+          : prev
+      );
+    } catch {
+      Alert.alert('Save failed', 'Could not save statistics.');
+    }
+  };
+
   const createdAt = new Date(experiment.createdAt).toLocaleDateString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric',
     hour: 'numeric', minute: '2-digit',
@@ -239,6 +286,9 @@ export default function ExperimentDetailScreen() {
   };
 
   const entryCardWidth = (cardWidth - 10) / 2;
+  const selectedStats = Array.from(
+    new Set((experiment.selectedStats ?? []).map((id) => (id === 'average' ? 'mean' : id)))
+  ).filter((id) => STAT_OPTIONS.some((option) => option.id === id));
 
   return (
     <YStack
@@ -255,6 +305,14 @@ export default function ExperimentDetailScreen() {
         onSave={addEntries}
         onStartTimer={startTimer}
         onStartCounter={startCounter}
+      />
+
+      <StatisticsPickerModal
+        visible={statisticsModalVisible}
+        options={STAT_OPTIONS}
+        selectedStatIds={selectedStats}
+        onClose={() => setStatisticsModalVisible(false)}
+        onSave={updateSelectedStats}
       />
 
       {/* Edit Entry Modal */}
@@ -469,6 +527,62 @@ export default function ExperimentDetailScreen() {
               <Text color="$color">Finish</Text>
             </Button>
           </YStack>
+        )}
+      </YStack>
+
+      <XStack width={cardWidth} alignSelf="center" alignItems="center" justifyContent="space-between" paddingTop={12}>
+        <Text fontSize={20} fontWeight="700" color="$color">Statistics</Text>
+        <Button
+          onPress={() => setStatisticsModalVisible(true)}
+          borderWidth={1}
+          width={34}
+          height={34}
+          borderRadius={17}
+          borderColor="$borderColor"
+          backgroundColor="$backgroundStrong"
+          alignItems="center"
+          justifyContent="center"
+          paddingHorizontal={0}
+        >
+          <Text color="$color" fontSize={18}>+</Text>
+        </Button>
+      </XStack>
+
+      <YStack width={cardWidth} alignSelf="center" gap={10} paddingTop={8}>
+        {selectedStats.length === 0 ? (
+          <YStack
+            borderWidth={1}
+            borderRadius={12}
+            borderColor="$borderColor"
+            borderStyle="dashed"
+            padding={20}
+            alignItems="center"
+          >
+            <Text fontSize={14} color="$colorHover">No statistics yet.</Text>
+          </YStack>
+        ) : (
+          <XStack width={cardWidth} flexWrap="wrap" gap={10}>
+            {selectedStats.map((statId, index) => {
+              const stat = STAT_OPTIONS.find((option) => option.id === statId);
+              if (!stat) return null;
+              const isOddLastCard = selectedStats.length % 2 === 1 && index === selectedStats.length - 1;
+              return (
+                <YStack
+                  key={stat.id}
+                  width={isOddLastCard ? cardWidth : entryCardWidth}
+                  backgroundColor="$backgroundStrong"
+                  borderColor="$borderColor"
+                  borderWidth={1}
+                  borderRadius={12}
+                  padding={12}
+                  gap={4}
+                >
+                  <Text fontSize={12} color="$colorHover">{stat.label}</Text>
+                  <Text fontSize={18} color="$color">0</Text>
+                </YStack>
+              );
+            })}
+          </XStack>
         )}
       </YStack>
 
