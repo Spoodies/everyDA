@@ -114,19 +114,17 @@ export function StatisticsPickerModal({
                         paddingHorizontal={10}
                         gap={8}
                       >
-                        <Text color="$color" flex={1}>{option.label}</Text>
+                        <Button
+                          onPress={() => toggleStat(option.id)}
+                          flex={1}
+                          borderWidth={0}
+                          backgroundColor="transparent"
+                          paddingHorizontal={0}
+                          justifyContent="flex-start"
+                        >
+                          <Text color="$color">{option.label}</Text>
+                        </Button>
                         <XStack gap={6}>
-                          <Button
-                            onPress={() => toggleStat(option.id)}
-                            borderWidth={1}
-                            borderRadius={8}
-                            borderColor="$borderColor"
-                            backgroundColor="$background"
-                            height={30}
-                            paddingHorizontal={10}
-                          >
-                            <Text color="$colorHover">Remove</Text>
-                          </Button>
                           <Button
                             onPress={() => moveStat(index, 'up')}
                             disabled={index === 0}
