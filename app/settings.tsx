@@ -32,6 +32,15 @@ export default function SettingsScreen() {
             >
             Theme: {themeName}
         </Button>
+        <Text
+            position="absolute"
+            bottom={24}
+            fontSize={12}
+            opacity={0.5}
+            textAlign="center"
+        >
+            I would love any feedback at kaleb.pick@gmail.com
+        </Text>
     </YStack>
 
   );
