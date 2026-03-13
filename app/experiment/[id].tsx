@@ -16,7 +16,7 @@ const STAT_OPTIONS = [
   { id: 'median', label: 'Median' },
   { id: 'mode', label: 'Mode' },
   { id: 'confint', label: 'Confint' },
-  { id: 'predint', label: 'Pred Interval' },
+  { id: 'predint', label: 'Predint' },
   { id: 'stddev', label: 'Stddev' },
   { id: 'entry_count', label: 'Entry Count' },
 ];
