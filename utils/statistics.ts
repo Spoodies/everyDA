@@ -52,6 +52,12 @@ export function confint(values: number[]): number {
   return 1.96 * (stddev(values) / Math.sqrt(values.length));
 }
 
+/** 95% prediction interval half-width: 1.96 * stddev * sqrt(1 + 1/n) */
+export function predint(values: number[]): number {
+  if (values.length < 2) return 0;
+  return 1.96 * stddev(values) * Math.sqrt(1 + 1 / values.length);
+}
+
 export function computeStat(
   statId: string,
   data: TimeEntry[] | EventEntry[],
@@ -67,6 +73,7 @@ export function computeStat(
     case 'mode':    return mode(values);
     case 'stddev':  return stddev(values);
     case 'confint': return confint(values);
+    case 'predint': return predint(values);
     default:        return 0;
   }
 }
@@ -92,6 +99,12 @@ export function formatStatDisplay(
     const m = mean(values);
     const ci = confint(values);
     return `${formatStatValue(m - ci)} – ${formatStatValue(m + ci)}`;
+  }
+  if (statId === 'predint') {
+    const values = extractValues(data, kind);
+    const m = mean(values);
+    const pi = predint(values);
+    return `${formatStatValue(m - pi)} – ${formatStatValue(m + pi)}`;
   }
   return formatStatValue(computeStat(statId, data, kind));
 }
