@@ -289,6 +289,10 @@ export default function ExperimentDetailScreen() {
   const selectedStats = Array.from(
     new Set((experiment.selectedStats ?? []).map((id) => (id === 'average' ? 'mean' : id)))
   ).filter((id) => STAT_OPTIONS.some((option) => option.id === id));
+  const selectedStatRows = Array.from(
+    { length: Math.ceil(selectedStats.length / 2) },
+    (_, index) => selectedStats.slice(index * 2, index * 2 + 2)
+  );
 
   return (
     <YStack
@@ -561,28 +565,53 @@ export default function ExperimentDetailScreen() {
             <Text fontSize={14} color="$colorHover">No statistics yet.</Text>
           </YStack>
         ) : (
-          <XStack width={cardWidth} flexWrap="wrap" gap={10}>
-            {selectedStats.map((statId, index) => {
-              const stat = STAT_OPTIONS.find((option) => option.id === statId);
-              if (!stat) return null;
-              const isOddLastCard = selectedStats.length % 2 === 1 && index === selectedStats.length - 1;
+          <YStack
+            width={cardWidth}
+            borderWidth={1}
+            borderRadius={12}
+            borderColor="$borderColor"
+            backgroundColor="$backgroundStrong"
+            paddingHorizontal={10}
+          >
+            {selectedStatRows.map((row, rowIndex) => {
+              const isLastRow = rowIndex === selectedStatRows.length - 1;
+              const leftStat = STAT_OPTIONS.find((option) => option.id === row[0]);
+              const rightStat = row[1] ? STAT_OPTIONS.find((option) => option.id === row[1]) : null;
               return (
-                <YStack
-                  key={stat.id}
-                  width={isOddLastCard ? cardWidth : entryCardWidth}
-                  backgroundColor="$backgroundStrong"
-                  borderColor="$borderColor"
-                  borderWidth={1}
-                  borderRadius={12}
-                  padding={12}
-                  gap={4}
+                <XStack
+                  key={`stat-row-${rowIndex}`}
+                  width="100%"
+                  alignItems="center"
+                  paddingVertical={9}
+                  borderBottomWidth={isLastRow ? 0 : 1}
+                  borderBottomColor="$borderColor"
                 >
-                  <Text fontSize={12} color="$colorHover">{stat.label}</Text>
-                  <Text fontSize={18} color="$color">0</Text>
-                </YStack>
+                  {rightStat ? (
+                    <>
+                      <XStack width="48%" alignItems="center" justifyContent="space-between" gap={8}>
+                        <Text fontSize={13} color="$colorHover" numberOfLines={1}>{leftStat?.label}</Text>
+                        <Text fontSize={13} color="$color">0</Text>
+                      </XStack>
+                      <YStack width={1} alignSelf="stretch" backgroundColor="$borderColor" marginHorizontal={8} />
+                      <XStack width="48%" alignItems="center" justifyContent="space-between" gap={8}>
+                        <Text fontSize={13} color="$colorHover" numberOfLines={1}>{rightStat.label}</Text>
+                        <Text fontSize={13} color="$color">0</Text>
+                      </XStack>
+                    </>
+                  ) : (
+                    <XStack width="100%" alignItems="center" justifyContent="center">
+                      <YStack width={1} alignSelf="stretch" backgroundColor="$borderColor" marginHorizontal={8} />
+                      <XStack width="48%" alignItems="center" justifyContent="space-between" gap={8}>
+                        <Text fontSize={13} color="$colorHover" numberOfLines={1}>{leftStat?.label}</Text>
+                        <Text fontSize={13} color="$color">0</Text>
+                      </XStack>
+                      <YStack width={1} alignSelf="stretch" backgroundColor="$borderColor" marginHorizontal={8} />
+                    </XStack>
+                  )}
+                </XStack>
               );
             })}
-          </XStack>
+          </YStack>
         )}
       </YStack>
 
