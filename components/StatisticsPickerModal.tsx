@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Modal, StyleSheet } from 'react-native';
 import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
-import type { EventEntry, ExperimentKind, TimeEntry } from '../types/experiment';
+import type { EventEntry, ExperimentKind, OccurrenceEntry, TimeEntry } from '../types/experiment';
 import { formatStatDisplay } from '../utils/statistics';
 
 export type StatisticOption = {
@@ -14,7 +14,7 @@ type Props = {
   visible: boolean;
   options: StatisticOption[];
   selectedStatIds: string[];
-  data: TimeEntry[] | EventEntry[];
+  data: TimeEntry[] | EventEntry[] | OccurrenceEntry[];
   kind: ExperimentKind;
   onClose: () => void;
   onSave: (selectedStatIds: string[]) => void;

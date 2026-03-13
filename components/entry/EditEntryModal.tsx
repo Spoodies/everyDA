@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Button, Input, ScrollView, Text, XStack, YStack } from 'tamagui';
-import type { EventEntry, TimeEntry } from '../../types/experiment';
+import type { EventEntry, ExperimentKind, OccurrenceEntry, TimeEntry } from '../../types/experiment';
 
 interface EditEntryModalProps {
-  entry: TimeEntry | EventEntry;
-  kind: string;
+  entry: TimeEntry | EventEntry | OccurrenceEntry;
+  kind: ExperimentKind;
   cardWidth: number;
-  onSave: (entry: TimeEntry | EventEntry) => void;
+  onSave: (entry: TimeEntry | EventEntry | OccurrenceEntry) => void;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -20,8 +20,10 @@ export function EditEntryModal({
   onClose,
 }: EditEntryModalProps) {
   const isTimeEntry = 'duration' in entry;
+  const isEventEntry = 'count' in entry;
   const [duration, setDuration] = useState(isTimeEntry ? String((entry as TimeEntry).duration) : '');
-  const [count, setCount] = useState(!isTimeEntry ? String((entry as EventEntry).count) : '');
+  const [count, setCount] = useState(isEventEntry ? String((entry as EventEntry).count) : '');
+  const [timestamp, setTimestamp] = useState(entry.timestamp.replace('T', ' ').slice(0, 16));
 
   const handleSave = () => {
     if (isTimeEntry) {
@@ -29,10 +31,15 @@ export function EditEntryModal({
       if (!isNaN(dur) && dur > 0) {
         onSave({ ...entry, duration: dur } as TimeEntry);
       }
-    } else {
+    } else if (isEventEntry) {
       const c = parseInt(count, 10);
       if (!isNaN(c) && c > 0) {
         onSave({ ...entry, count: c } as EventEntry);
+      }
+    } else {
+      const parsed = new Date(timestamp.trim()).getTime();
+      if (!Number.isNaN(parsed)) {
+        onSave({ ...entry, timestamp: new Date(parsed).toISOString() } as OccurrenceEntry);
       }
     }
   };
@@ -68,7 +75,7 @@ export function EditEntryModal({
                 color="$color"
               />
             </YStack>
-          ) : (
+          ) : isEventEntry ? (
             <YStack gap={6}>
               <Text fontSize={13} color="$colorHover">Count</Text>
               <Input
@@ -76,6 +83,21 @@ export function EditEntryModal({
                 onChangeText={setCount}
                 keyboardType="number-pad"
                 placeholder="e.g. 5"
+                paddingHorizontal={12}
+                paddingVertical={8}
+                borderWidth={1}
+                borderColor="$borderColor"
+                borderRadius={8}
+                color="$color"
+              />
+            </YStack>
+          ) : (
+            <YStack gap={6}>
+              <Text fontSize={13} color="$colorHover">Date and time</Text>
+              <Input
+                value={timestamp}
+                onChangeText={setTimestamp}
+                placeholder="YYYY-MM-DD HH:mm"
                 paddingHorizontal={12}
                 paddingVertical={8}
                 borderWidth={1}

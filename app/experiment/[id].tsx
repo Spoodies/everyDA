@@ -6,13 +6,13 @@ import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
 import { AddEntryModal } from '../../components/AddEntryModal';
 import { StatisticsPickerModal } from '../../components/StatisticsPickerModal';
 import { EditEntryModal } from '../../components/entry/EditEntryModal';
-import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
+import type { EventEntry, Experiment, ExperimentKind, OccurrenceEntry, TimeEntry } from '../../types/experiment';
 import { STORAGE_KEY } from '../../types/experiment';
 import { formatStatDisplay } from '../../utils/statistics';
 
-const STAT_OPTIONS = [
+const SCALAR_STAT_OPTIONS = [
   { id: 'sum', label: 'Sum', description: 'Sum adds all recorded values together.' },
-  { id: 'mean', label: 'Mean', description: 'Mean is the average of all values: sum ÷ count.' },
+  { id: 'mean', label: 'Mean', description: 'Mean is the average of all values: sum / count.' },
   { id: 'median', label: 'Median', description: 'Median is the middle value after sorting the data.' },
   { id: 'mode', label: 'Mode', description: 'Mode is the value that appears most often.' },
   { id: 'confint', label: 'Confint', description: '95% confidence interval of the mean: mean ± 1.96 × (stddev / √n).' },
@@ -20,6 +20,24 @@ const STAT_OPTIONS = [
   { id: 'stddev', label: 'Stddev', description: 'Sample standard deviation measures spread around the mean.' },
   { id: 'entry_count', label: 'Entry Count', description: 'Entry Count is the number of recorded entries.' },
 ];
+
+const OCCURRENCE_STAT_OPTIONS = [
+  { id: 'entry_count', label: 'Entry Count', description: 'Entry Count is the number of recorded events.' },
+  { id: 'interval_count', label: 'Interval Count', description: 'Interval Count is the number of gaps between events (entries - 1).' },
+  { id: 'event_rate_per_day', label: 'Rate / Day', description: 'Average event rate per day across the observed time window.' },
+  { id: 'mean_interval', label: 'Mean Interval', description: 'Average time gap between consecutive events.' },
+  { id: 'median_interval', label: 'Median Interval', description: 'Middle time gap between events after sorting interval lengths.' },
+  { id: 'min_interval', label: 'Min Interval', description: 'Shortest observed time gap between two consecutive events.' },
+  { id: 'max_interval', label: 'Max Interval', description: 'Longest observed time gap between two consecutive events.' },
+  { id: 'interval_stddev', label: 'Interval Stddev', description: 'Spread of interval lengths; larger means more irregular timing.' },
+  { id: 'regularity_cv', label: 'Regularity CV', description: 'Coefficient of variation: stddev ÷ mean interval. Lower values mean more regular timing.' },
+  { id: 'time_since_last_event', label: 'Since Last Event', description: 'Elapsed time from the most recent event until now.' },
+];
+
+const getStatOptions = (kind: ExperimentKind) => {
+  if (kind === 'Occurrences') return OCCURRENCE_STAT_OPTIONS;
+  return SCALAR_STAT_OPTIONS;
+};
 
 export default function ExperimentDetailScreen() {
   const params = useLocalSearchParams<{ id: string | string[] }>();
@@ -135,7 +153,7 @@ export default function ExperimentDetailScreen() {
     );
   }
 
-  const addEntries = async (newEntries: TimeEntry[] | EventEntry[]) => {
+  const addEntries = async (newEntries: TimeEntry[] | EventEntry[] | OccurrenceEntry[]) => {
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
       const list: Experiment[] = raw ? (JSON.parse(raw) as Experiment[]) : [];
@@ -183,7 +201,7 @@ export default function ExperimentDetailScreen() {
     }
   };
 
-  const updateEntry = async (index: number, updatedEntry: TimeEntry | EventEntry) => {
+  const updateEntry = async (index: number, updatedEntry: TimeEntry | EventEntry | OccurrenceEntry) => {
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
       const list: Experiment[] = raw ? (JSON.parse(raw) as Experiment[]) : [];
@@ -216,7 +234,7 @@ export default function ExperimentDetailScreen() {
 
   const updateSelectedStats = async (selectedStats: string[]) => {
     try {
-      const allowed = new Set(STAT_OPTIONS.map((option) => option.id));
+      const allowed = new Set(getStatOptions(experiment.kind).map((option) => option.id));
       const normalized = selectedStats.filter((id) => allowed.has(id));
 
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
@@ -287,6 +305,7 @@ export default function ExperimentDetailScreen() {
   };
 
   const entryCardWidth = (cardWidth - 10) / 2;
+  const statOptions = getStatOptions(experiment.kind);
   const selectedStats = Array.from(
     new Set(
       (experiment.selectedStats ?? [])
@@ -296,7 +315,7 @@ export default function ExperimentDetailScreen() {
           return id;
         })
     )
-  ).filter((id) => STAT_OPTIONS.some((option) => option.id === id));
+  ).filter((id) => statOptions.some((option) => option.id === id));
   const selectedStatRows = Array.from(
     { length: Math.ceil(selectedStats.length / 2) },
     (_, index) => selectedStats.slice(index * 2, index * 2 + 2)
@@ -321,7 +340,7 @@ export default function ExperimentDetailScreen() {
 
       <StatisticsPickerModal
         visible={statisticsModalVisible}
-        options={STAT_OPTIONS}
+        options={statOptions}
         selectedStatIds={selectedStats}
         data={experiment.data}
         kind={experiment.kind}
@@ -585,8 +604,8 @@ export default function ExperimentDetailScreen() {
           >
             {selectedStatRows.map((row, rowIndex) => {
               const isLastRow = rowIndex === selectedStatRows.length - 1;
-              const leftStat = STAT_OPTIONS.find((option) => option.id === row[0]);
-              const rightStat = row[1] ? STAT_OPTIONS.find((option) => option.id === row[1]) : null;
+              const leftStat = statOptions.find((option) => option.id === row[0]);
+              const rightStat = row[1] ? statOptions.find((option) => option.id === row[1]) : null;
               return (
                 <XStack
                   key={`stat-row-${rowIndex}`}
@@ -669,6 +688,9 @@ export default function ExperimentDetailScreen() {
                         )}
                         {'count' in entry && (
                           <Text fontSize={14} color="$color">Count: {entry.count}</Text>
+                        )}
+                        {!('duration' in entry) && !('count' in entry) && (
+                          <Text fontSize={14} color="$color">Occurred</Text>
                         )}
                       </YStack>
                     </Button>
