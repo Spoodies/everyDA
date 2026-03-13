@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, StyleSheet } from 'react-native';
 import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
+import type { EventEntry, ExperimentKind, TimeEntry } from '../types/experiment';
+import { formatStatDisplay } from '../utils/statistics';
 
 export type StatisticOption = {
   id: string;
@@ -11,6 +13,8 @@ type Props = {
   visible: boolean;
   options: StatisticOption[];
   selectedStatIds: string[];
+  data: TimeEntry[] | EventEntry[];
+  kind: ExperimentKind;
   onClose: () => void;
   onSave: (selectedStatIds: string[]) => void;
 };
@@ -19,6 +23,8 @@ export function StatisticsPickerModal({
   visible,
   options,
   selectedStatIds,
+  data,
+  kind,
   onClose,
   onSave,
 }: Props) {
@@ -122,7 +128,10 @@ export function StatisticsPickerModal({
                           paddingHorizontal={0}
                           justifyContent="flex-start"
                         >
-                          <Text color="$color">{option.label}</Text>
+                          <XStack width="100%" justifyContent="space-between" alignItems="center">
+                            <Text color="$color">{option.label}</Text>
+                            <Text color="$colorHover">{formatStatDisplay(option.id, data, kind)}</Text>
+                          </XStack>
                         </Button>
                         <XStack gap={6}>
                           <Button
@@ -172,7 +181,10 @@ export function StatisticsPickerModal({
                       justifyContent="flex-start"
                       paddingHorizontal={12}
                     >
-                      <Text color="$color">{option.label}</Text>
+                      <XStack width="100%" justifyContent="space-between" alignItems="center">
+                        <Text color="$color">{option.label}</Text>
+                        <Text color="$colorHover">{formatStatDisplay(option.id, data, kind)}</Text>
+                      </XStack>
                     </Button>
                   ))}
                 </YStack>

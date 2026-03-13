@@ -317,6 +317,8 @@ export default function ExperimentDetailScreen() {
         visible={statisticsModalVisible}
         options={STAT_OPTIONS}
         selectedStatIds={selectedStats}
+        data={experiment.data}
+        kind={experiment.kind}
         onClose={() => setStatisticsModalVisible(false)}
         onSave={updateSelectedStats}
       />
