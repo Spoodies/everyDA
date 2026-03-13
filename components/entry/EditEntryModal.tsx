@@ -93,17 +93,19 @@ export function EditEntryModal({
             </YStack>
           ) : (
             <YStack gap={6}>
-              <Text fontSize={13} color="$colorHover">Date and time</Text>
+              <Text fontSize={13} color="$colorHover">Date and time (YYYY-MM-DD HH:mm)</Text>
               <Input
                 value={timestamp}
                 onChangeText={setTimestamp}
-                placeholder="YYYY-MM-DD HH:mm"
+                placeholder="e.g. 2026-03-13 14:30"
                 paddingHorizontal={12}
                 paddingVertical={8}
                 borderWidth={1}
                 borderColor="$borderColor"
                 borderRadius={8}
                 color="$color"
+                backgroundColor="$background"
+                placeholderTextColor="$placeholderColor"
               />
             </YStack>
           )}

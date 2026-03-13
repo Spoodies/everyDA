@@ -66,11 +66,14 @@ export const OccurrencesEntryContent = forwardRef<EntryContentRef, OccurrencesEn
           </YStack>
         ) : (
           <YStack gap={6}>
-            <Text fontSize={13} color="$colorHover">Date and time</Text>
+            <Text fontSize={13} color="$colorHover">Date and time (YYYY-MM-DD HH:mm)</Text>
             <Input
-              placeholder="YYYY-MM-DD HH:mm"
               value={manualTimestamp}
               onChangeText={setManualTimestamp}
+              placeholder="e.g. 2026-03-13 14:30"
+              fontSize={16}
+              paddingHorizontal={12}
+              paddingVertical={10}
               borderColor="$borderColor"
               borderRadius={10}
               color="$color"
