@@ -11,7 +11,6 @@ import { STORAGE_KEY } from '../../types/experiment';
 import { formatStatDisplay } from '../../utils/statistics';
 
 const STAT_OPTIONS = [
-  { id: 'total', label: 'Total' },
   { id: 'sum', label: 'Sum' },
   { id: 'mean', label: 'Mean' },
   { id: 'median', label: 'Median' },
@@ -289,7 +288,14 @@ export default function ExperimentDetailScreen() {
 
   const entryCardWidth = (cardWidth - 10) / 2;
   const selectedStats = Array.from(
-    new Set((experiment.selectedStats ?? []).map((id) => (id === 'average' ? 'mean' : id)))
+    new Set(
+      (experiment.selectedStats ?? [])
+        .map((id) => {
+          if (id === 'average') return 'mean';
+          if (id === 'total') return 'sum';
+          return id;
+        })
+    )
   ).filter((id) => STAT_OPTIONS.some((option) => option.id === id));
   const selectedStatRows = Array.from(
     { length: Math.ceil(selectedStats.length / 2) },
