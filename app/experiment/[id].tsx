@@ -8,6 +8,7 @@ import { StatisticsPickerModal } from '../../components/StatisticsPickerModal';
 import { EditEntryModal } from '../../components/entry/EditEntryModal';
 import type { EventEntry, Experiment, TimeEntry } from '../../types/experiment';
 import { STORAGE_KEY } from '../../types/experiment';
+import { formatStatDisplay } from '../../utils/statistics';
 
 const STAT_OPTIONS = [
   { id: 'total', label: 'Total' },
@@ -590,12 +591,12 @@ export default function ExperimentDetailScreen() {
                     <>
                       <XStack width="48%" alignItems="center" justifyContent="space-between" gap={8}>
                         <Text fontSize={13} color="$colorHover" numberOfLines={1}>{leftStat?.label}</Text>
-                        <Text fontSize={13} color="$color">0</Text>
+                        <Text fontSize={13} color="$color">{formatStatDisplay(row[0], experiment.data, experiment.kind)}</Text>
                       </XStack>
                       <YStack width={1} alignSelf="stretch" backgroundColor="$borderColor" marginHorizontal={8} />
                       <XStack width="48%" alignItems="center" justifyContent="space-between" gap={8}>
                         <Text fontSize={13} color="$colorHover" numberOfLines={1}>{rightStat.label}</Text>
-                        <Text fontSize={13} color="$color">0</Text>
+                        <Text fontSize={13} color="$color">{formatStatDisplay(row[1], experiment.data, experiment.kind)}</Text>
                       </XStack>
                     </>
                   ) : (
@@ -603,7 +604,7 @@ export default function ExperimentDetailScreen() {
                       <YStack width={1} alignSelf="stretch" backgroundColor="$borderColor" marginHorizontal={8} />
                       <XStack width="48%" alignItems="center" justifyContent="space-between" gap={8}>
                         <Text fontSize={13} color="$colorHover" numberOfLines={1}>{leftStat?.label}</Text>
-                        <Text fontSize={13} color="$color">0</Text>
+                        <Text fontSize={13} color="$color">{formatStatDisplay(row[0], experiment.data, experiment.kind)}</Text>
                       </XStack>
                       <YStack width={1} alignSelf="stretch" backgroundColor="$borderColor" marginHorizontal={8} />
                     </XStack>
